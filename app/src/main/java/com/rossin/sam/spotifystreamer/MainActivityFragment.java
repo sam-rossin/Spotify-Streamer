@@ -44,7 +44,6 @@ public class MainActivityFragment extends Fragment {
 
         //bind results
         listView.setAdapter(mArtistAdapter);
-
         return rootView;
     }
 }
