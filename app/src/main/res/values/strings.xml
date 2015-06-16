@@ -7,4 +7,7 @@
     <string name="title_activity_songs">SongsActivity</string>
 
     <string name="artist_not_found">We couldn\'t find any artists with that name.</string>
+    <string name="tracks_not_found">We couldn\'t find any tracks by this artist.</string>
+
+    <string name="us_country_code">US</string>
 </resources>

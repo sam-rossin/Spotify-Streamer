@@ -55,6 +55,8 @@ public class MainActivityFragment extends Fragment {
 
         //bind results
         listView.setAdapter(mArtistAdapter);
+
+        //set click listener
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view,
@@ -81,6 +83,7 @@ public class MainActivityFragment extends Fragment {
         });
         return rootView;
     }
+
 
     public class FetchArtistTask extends AsyncTask<String,Void,List<Artist>> {
         protected List<Artist> doInBackground(String... params){
