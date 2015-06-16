@@ -3,13 +3,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight">
+    android:layout_height="100dp">
 
     <ImageView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/artist_icon"
-        android:src="@mipmap/ic_launcher"/>
+        android:adjustViewBounds="true"
+        android:padding="2dp"/>
     
     <TextView
         android:id="@+id/textview_artist_name"

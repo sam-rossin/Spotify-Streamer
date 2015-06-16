@@ -31,7 +31,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment {
-    ArrayAdapter<String> mArtistAdapter;
+    ArtistAdapter mArtistAdapter;
     List<Artist> artists;
 
     public MainActivityFragment() {
@@ -46,9 +46,8 @@ public class MainActivityFragment extends Fragment {
         //create the adapter to fill list view
         //we use a SimpleAdapter
 
-        mArtistAdapter = new ArrayAdapter<String>(getActivity(),
-                R.layout.list_item_artist, R.id.textview_artist_name, new ArrayList<String>());
-        mArtistAdapter.setNotifyOnChange(false);
+        mArtistAdapter = new ArtistAdapter(getActivity(), R.layout.list_item_artist,
+                R.id.textview_artist_name, R.id.artist_icon);
 
 
         //get reference to listview
@@ -101,9 +100,7 @@ public class MainActivityFragment extends Fragment {
             artists = new_artists;
             if(artists != null && !artists.isEmpty()){
                 mArtistAdapter.clear();
-                for(Artist artist: artists){
-                    mArtistAdapter.add(artist.name);
-                }mArtistAdapter.notifyDataSetChanged();
+                mArtistAdapter.add(artists);
             }else{
                 Toast.makeText(getActivity(), R.string.artist_not_found, Toast.LENGTH_SHORT).show();
             }
