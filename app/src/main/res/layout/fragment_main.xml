@@ -10,7 +10,8 @@
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
         android:ems="10"
-        android:id="@+id/editText"
+        android:id="@+id/search"
+        android:imeOptions="actionSend"
         android:hint="@string/hint_artist_search"/>
 
     <ListView android:layout_width="match_parent"
