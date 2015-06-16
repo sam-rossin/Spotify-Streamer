@@ -15,6 +15,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +32,7 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  */
 public class MainActivityFragment extends Fragment {
     ArrayAdapter<String> mArtistAdapter;
+    List<Artist> artists;
 
     public MainActivityFragment() {
     }
@@ -42,9 +44,11 @@ public class MainActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         //create the adapter to fill list view
+        //we use a SimpleAdapter
 
         mArtistAdapter = new ArrayAdapter<String>(getActivity(),
                 R.layout.list_item_artist, R.id.textview_artist_name, new ArrayList<String>());
+        mArtistAdapter.setNotifyOnChange(false);
 
 
         //get reference to listview
@@ -56,9 +60,9 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view,
                                     int position, long l) {
-                String artist = mArtistAdapter.getItem(position);
+                String artist_id = artists.get(position).id;
                 Intent intent = new Intent(getActivity(), SongsActivity.class).
-                        putExtra(Intent.EXTRA_TEXT, artist);
+                        putExtra(Intent.EXTRA_TEXT, artist_id);
                 startActivity(intent);
             }
         });
@@ -69,9 +73,9 @@ public class MainActivityFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 boolean handled = false;
-                if(actionId == EditorInfo.IME_ACTION_SEND){
+                if(actionId == EditorInfo.IME_ACTION_DONE){
                     CharSequence word = v.getText();
-                    new FetchArtistTask().execute((String) word);
+                    new FetchArtistTask().execute(word.toString());
                     handled = true;
                 }return handled;
             }
@@ -79,23 +83,29 @@ public class MainActivityFragment extends Fragment {
         return rootView;
     }
 
-    public class FetchArtistTask extends AsyncTask<String,Void,List<String>> {
-        protected List<String> doInBackground(String... params){
+    public class FetchArtistTask extends AsyncTask<String,Void,List<Artist>> {
+        protected List<Artist> doInBackground(String... params){
             if(params.length==0) return null;
+
+            //do the fetching
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotify = api.getService();
             ArtistsPager results = spotify.searchArtists(params[0]);
-            List<Artist> artists = results.artists.items;
-            List<String> names = new ArrayList<String>();
-            for(Artist artist: artists) names.add(artist.name);
-            return names;
+
+            //parse the result
+            return results.artists.items;
         }
 
         @Override
-        protected void onPostExecute(List<String> names) {
-            if(names != null){
+        protected void onPostExecute(List<Artist> new_artists) {
+            artists = new_artists;
+            if(artists != null && !artists.isEmpty()){
                 mArtistAdapter.clear();
-                mArtistAdapter.addAll(names);
+                for(Artist artist: artists){
+                    mArtistAdapter.add(artist.name);
+                }mArtistAdapter.notifyDataSetChanged();
+            }else{
+                Toast.makeText(getActivity(), R.string.artist_not_found, Toast.LENGTH_SHORT).show();
             }
         }
     }
