@@ -27,7 +27,6 @@
                 android:value="com.rossin.sam.spotifystreamer.MainActivity" />
         </activity>
         <activity
-            android:theme="@style/Theme.AppCompat.Light.DialogWhenLarge"
             android:name=".PlaybackActivity"
             android:label="@string/title_activity_playback"
             android:parentActivityName=".SongsActivity" >
