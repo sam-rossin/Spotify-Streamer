@@ -31,8 +31,18 @@ import kaaes.spotify.webapi.android.models.ArtistsPager;
  * A placeholder fragment containing a simple view.
  */
 public class MainActivityFragment extends Fragment {
+    public static final String SEARCH_KEY = "search_key";
     ArtistAdapter mArtistAdapter;
     List<Artist> artists;
+    String mSearchVal;
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        if(mSearchVal != null){
+            outState.putString(SEARCH_KEY, mSearchVal);
+        }
+        super.onSaveInstanceState(outState);
+    }
 
     public MainActivityFragment() {
     }
@@ -40,6 +50,10 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        if(savedInstanceState != null){
+
+        }
+
         //inflate layout
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
@@ -74,13 +88,23 @@ public class MainActivityFragment extends Fragment {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 boolean handled = false;
-                if(actionId == EditorInfo.IME_ACTION_DONE){
-                    CharSequence word = v.getText();
-                    new FetchArtistTask().execute(word.toString());
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    mSearchVal = v.getText().toString();
+                    new FetchArtistTask().execute(mSearchVal);
                     handled = true;
-                }return handled;
+                }
+                return handled;
             }
         });
+
+        //fix search results on restore
+        if(savedInstanceState != null){
+            mSearchVal = savedInstanceState.getString(SEARCH_KEY);
+            if(mSearchVal != null){
+                new FetchArtistTask().execute(mSearchVal);
+            }
+        }
+
         return rootView;
     }
 

@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -40,6 +41,7 @@ public class SongsActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
         View rootView = inflater.inflate(R.layout.fragment_songs, container, false);
 
         //get the tracks
@@ -50,6 +52,14 @@ public class SongsActivityFragment extends Fragment {
 
         //get reference to listview
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_songs_results);
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(getActivity(), PlaybackActivity.class);
+                startActivity(intent);
+            }
+        });
 
         listView.setAdapter(mSongsAdapter);
 

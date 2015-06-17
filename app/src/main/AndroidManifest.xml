@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.rossin.sam.spotifystreamer" >
+
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -23,6 +25,15 @@
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.rossin.sam.spotifystreamer.MainActivity" />
+        </activity>
+        <activity
+            android:theme="@style/Theme.AppCompat.Light.DialogWhenLarge"
+            android:name=".PlaybackActivity"
+            android:label="@string/title_activity_playback"
+            android:parentActivityName=".SongsActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.rossin.sam.spotifystreamer.SongsActivity" />
         </activity>
     </application>
 
