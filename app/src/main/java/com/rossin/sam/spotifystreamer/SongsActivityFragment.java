@@ -33,7 +33,7 @@ import retrofit.http.QueryMap;
  */
 public class SongsActivityFragment extends Fragment {
     SongsAdapter mSongsAdapter;
-    List<Track> trackList;
+    List<Track> mTrackList;
 
     public SongsActivityFragment() {
     }
@@ -44,8 +44,11 @@ public class SongsActivityFragment extends Fragment {
 
         View rootView = inflater.inflate(R.layout.fragment_songs, container, false);
 
-        //get the tracks
-        String name = getActivity().getIntent().getStringExtra(Intent.EXTRA_TEXT);
+        //retrieve extra
+        final ArrayList<String> artistData  = getActivity().getIntent().
+                getStringArrayListExtra(Intent.EXTRA_TEXT);
+
+        //set up listView adapter
         mSongsAdapter = new SongsAdapter(getActivity(),
                 R.layout.list_item_song, R.id.text_view_song, R.id.text_view_album,
                 R.id.song_icon);
@@ -53,17 +56,30 @@ public class SongsActivityFragment extends Fragment {
         //get reference to listview
         ListView listView = (ListView) rootView.findViewById(R.id.list_view_songs_results);
 
+        //set on click listener
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getActivity(), PlaybackActivity.class);
+                Track song = mTrackList.get(position);
+
+                //build data to send on click
+                //form: [artistId, artistName, albumName, songName, albumImageURL, streamURL]
+                ArrayList<String> data = new ArrayList<>(artistData);
+                data.add(song.album.name);
+                data.add(song.name);
+                data.add(song.album.images.get(0).url);
+                data.add(song.preview_url);
+
+                //start intent
+                intent.putStringArrayListExtra(Intent.EXTRA_TEXT, data);
                 startActivity(intent);
             }
         });
 
         listView.setAdapter(mSongsAdapter);
 
-        new FetchTracksTask().execute(name);
+        new FetchTracksTask().execute(artistData.get(0));
 
         return rootView;
     }
@@ -75,19 +91,20 @@ public class SongsActivityFragment extends Fragment {
             //do the fetching
             SpotifyApi api = new SpotifyApi();
             SpotifyService spotify = api.getService();
-            Map<String, Object> options = new HashMap<String, Object>();
+            Map<String, Object> options = new HashMap<>();
             options.put("country", getString(R.string.us_country_code));
             return spotify.getArtistTopTrack(params[0], options);
         }
 
         @Override
         protected void onPostExecute(Tracks tracks) {
-            trackList = tracks.tracks;
-            if(trackList != null && !trackList.isEmpty()){
+            mTrackList = tracks.tracks;
+            if(mTrackList != null && !mTrackList.isEmpty()){
                 mSongsAdapter.clear();
-                mSongsAdapter.add(trackList);
+                mSongsAdapter.add(mTrackList);
             }else{
-                Toast.makeText(getActivity(), R.string.tracks_not_found, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.tracks_not_found,
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }

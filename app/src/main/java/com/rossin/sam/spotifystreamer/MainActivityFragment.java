@@ -50,10 +50,6 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        if(savedInstanceState != null){
-
-        }
-
         //inflate layout
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
@@ -75,9 +71,16 @@ public class MainActivityFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view,
                                     int position, long l) {
-                String artist_id = artists.get(position).id;
+                //make arrayList with the extras we want
+                //will have form [id, name]
+                Artist artist = artists.get(position);
+                ArrayList<String> data = new ArrayList<>();
+                data.add(artist.id);
+                data.add(artist.name);
+
+                //create and start intent
                 Intent intent = new Intent(getActivity(), SongsActivity.class).
-                        putExtra(Intent.EXTRA_TEXT, artist_id);
+                        putStringArrayListExtra(Intent.EXTRA_TEXT, data);
                 startActivity(intent);
             }
         });
