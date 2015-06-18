@@ -34,13 +34,24 @@ public class PlaybackActivityFragment extends Fragment {
     private Handler mSeekBarHandler = new Handler();
     private SeekBar mSeekBar;
     private Runnable updateSeekBar;
+    private int mPosition;
+    private int mDuration;
+
+    private TextView artistView;
+    private TextView albumView;
+    private TextView songView;
+    private ImageView imageView;
 
     public PlaybackActivityFragment() {
     }
 
     @Override
     public void onStop() {
+        deleteMediaPlayer();
         super.onStop();
+    }
+
+    private void deleteMediaPlayer(){
         if(mMediaPlayer != null) mMediaPlayer.release();
         mSeekBarHandler.removeCallbacks(updateSeekBar);
         mMediaPlayer = null;
@@ -52,27 +63,16 @@ public class PlaybackActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_playback, container, false);
 
 
-        //get extra
-        //data form [artistId, artistName, albumName, songName, albumImageURL, streamURL]
+        //get extra data
         mTracksData = (TracksData) getActivity().getIntent().
                 getSerializableExtra(SongsActivityFragment.SER_EXTRA);
-        int position = getActivity().getIntent().getIntExtra(SongsActivityFragment.INT_EXTRA, 0);
+        mPosition = getActivity().getIntent().getIntExtra(SongsActivityFragment.INT_EXTRA, 0);
 
-        ArrayList<String> data = mTracksData.getTrack(position);
-
-        //fill out fields of view
-        TextView artistView = (TextView) rootView.findViewById(R.id.text_view_playback_artist);
-        artistView.setText(mTracksData.getArtistName());
-
-        TextView albumView = (TextView) rootView.findViewById(R.id.text_view_playback_album);
-        albumView.setText(data.get(0));
-
-        TextView songView = (TextView) rootView.findViewById(R.id.text_view_playback_song);
-        songView.setText(data.get(1));
-
-        ImageView imageView = (ImageView) rootView.findViewById(R.id.playback_image);
-        Picasso.with(getActivity()).load(data.get(2)).into(imageView);
-
+        //get views
+        artistView = (TextView) rootView.findViewById(R.id.text_view_playback_artist);
+        albumView = (TextView) rootView.findViewById(R.id.text_view_playback_album);
+        songView = (TextView) rootView.findViewById(R.id.text_view_playback_song);
+        imageView = (ImageView) rootView.findViewById(R.id.playback_image);
         mSeekBar = (SeekBar) rootView.findViewById(R.id.seekBar);
 
         //set up onClickListeners
@@ -80,6 +80,7 @@ public class PlaybackActivityFragment extends Fragment {
         previousButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                previous();
             }
         });
 
@@ -87,6 +88,7 @@ public class PlaybackActivityFragment extends Fragment {
         nextButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                next();
             }
         });
 
@@ -99,40 +101,79 @@ public class PlaybackActivityFragment extends Fragment {
             }
         });
 
-        //create runnable
+        //create runnable to track seek bar progress
         updateSeekBar = new Runnable(){
             @Override
             public void run() {
                 int time = mMediaPlayer.getCurrentPosition();
-                mSeekBar.setProgress(time);
+                setProgress(time);
                 if(mMediaPlayer.isPlaying()) mSeekBarHandler.postDelayed(this, 100);
             }
         };
 
-        //make the media player
-        makeMediaPlayer(data.get(3));
+        startTrack();
 
         return rootView;
     }
 
+
+    //Starts the player
+    private void startTrack(){
+        //fill views
+        ArrayList<String> data = mTracksData.getTrack(mPosition);
+        artistView.setText(mTracksData.getArtistName());
+        albumView.setText(data.get(0));
+        songView.setText(data.get(1));
+        Picasso.with(getActivity()).load(data.get(2)).into(imageView);
+
+        //make the media player
+        makeMediaPlayer(data.get(3));
+    }
+
     //pause the player
     private void pause(ImageButton playButton){
+        mPlaying = false;
+        playButton.setImageResource(android.R.drawable.ic_media_play);
         if(mMediaPlayer.isPlaying()){
-            playButton.setImageResource(android.R.drawable.ic_media_play);
-            mPlaying = false;
             mMediaPlayer.pause();
         }
+    }
+
+    //set song progress
+    private void setProgress(int progress){
+        mSeekBar.setProgress(progress);
     }
 
     //play the song
     private void play(ImageButton playButton){
         mPlaying = true;
-        if(mMediaPlayer.isPlaying()){
-            return;
-        }
         playButton.setImageResource(android.R.drawable.ic_media_pause);
         mMediaPlayer.start();
         mSeekBarHandler.postDelayed(updateSeekBar, 100);
+    }
+
+    //go to the next song
+    private void next(){
+        if(mPosition < mTracksData.size() -1){
+            deleteMediaPlayer();
+            mPosition++;
+            setProgress(0);
+            startTrack();
+        }else{
+            Toast.makeText(getActivity(), R.string.last_track, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    //go to previous song
+    private void previous(){
+        if(mPosition > 0){
+            deleteMediaPlayer();
+            mPosition--;
+            setProgress(0);
+            startTrack();
+        }else{
+            Toast.makeText(getActivity(), R.string.first_track, Toast.LENGTH_SHORT).show();
+        }
     }
 
     //create the media player
@@ -144,7 +185,8 @@ public class PlaybackActivityFragment extends Fragment {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 if (mp == mMediaPlayer) {
-                    mSeekBar.setMax(mp.getDuration());
+                    mDuration = mp.getDuration();
+                    mSeekBar.setMax(mDuration);
                     mp.start();
                     mSeekBarHandler.postDelayed(updateSeekBar, 100);
                 }
