@@ -8,6 +8,7 @@
 
     <string name="artist_not_found">We couldn\'t find any artists with that name.</string>
     <string name="tracks_not_found">We couldn\'t find any tracks by this artist.</string>
+    <string name="preview_not_found">Can\'t preview this song.</string>
 
     <string name="us_country_code">US</string>
     <string name="title_activity_playback">PlaybackActivity</string>

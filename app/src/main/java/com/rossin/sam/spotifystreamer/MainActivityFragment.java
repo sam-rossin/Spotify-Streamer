@@ -90,11 +90,13 @@ public class MainActivityFragment extends Fragment {
         editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                boolean handled = false;
+                boolean handled = true;
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     mSearchVal = v.getText().toString();
-                    new FetchArtistTask().execute(mSearchVal);
-                    handled = true;
+                    if(!mSearchVal.equals("")) {
+                        new FetchArtistTask().execute(mSearchVal);
+                        handled = false;
+                    }
                 }
                 return handled;
             }
@@ -132,7 +134,8 @@ public class MainActivityFragment extends Fragment {
                 mArtistAdapter.clear();
                 mArtistAdapter.add(artists);
             }else{
-                Toast.makeText(getActivity(), R.string.artist_not_found, Toast.LENGTH_SHORT).show();
+                Toast.makeText(getActivity(), R.string.artist_not_found,
+                        Toast.LENGTH_SHORT).show();
             }
         }
     }

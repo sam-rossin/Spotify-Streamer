@@ -34,27 +34,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_margin="15dp">
+        android:layout_margin="30dp">
 
         <ImageButton
+            android:id="@+id/button_previous"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
-            android:background="@android:drawable/ic_media_previous"
+            android:src="@android:drawable/ic_media_previous"
             android:adjustViewBounds="true"/>
 
         <ImageButton
+            android:id="@+id/button_play"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
-            android:background="@android:drawable/ic_media_play"
+            android:src="@android:drawable/ic_media_pause"
             android:adjustViewBounds="true"/>
 
         <ImageButton
+            android:id="@+id/button_next"
             android:layout_width="0dp"
             android:layout_weight="1"
             android:layout_height="match_parent"
-            android:background="@android:drawable/ic_media_next"
+            android:src="@android:drawable/ic_media_next"
             android:adjustViewBounds="true"/>
 
     </LinearLayout>

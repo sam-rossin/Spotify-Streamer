@@ -33,7 +33,10 @@ import retrofit.http.QueryMap;
  */
 public class SongsActivityFragment extends Fragment {
     SongsAdapter mSongsAdapter;
-    List<Track> mTrackList;
+    TracksData mTracksData;
+    List<String> mArtistData;
+    public static final String INT_EXTRA = "com.rossin.sam.spotifystreamer.extra.int";
+    public static final String SER_EXTRA = "com.rossin.sam.spotifystreamer.extra.ser";
 
     public SongsActivityFragment() {
     }
@@ -45,7 +48,7 @@ public class SongsActivityFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_songs, container, false);
 
         //retrieve extra
-        final ArrayList<String> artistData  = getActivity().getIntent().
+        mArtistData  = getActivity().getIntent().
                 getStringArrayListExtra(Intent.EXTRA_TEXT);
 
         //set up listView adapter
@@ -61,25 +64,15 @@ public class SongsActivityFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(getActivity(), PlaybackActivity.class);
-                Track song = mTrackList.get(position);
-
-                //build data to send on click
-                //form: [artistId, artistName, albumName, songName, albumImageURL, streamURL]
-                ArrayList<String> data = new ArrayList<>(artistData);
-                data.add(song.album.name);
-                data.add(song.name);
-                data.add(song.album.images.get(0).url);
-                data.add(song.preview_url);
-
-                //start intent
-                intent.putStringArrayListExtra(Intent.EXTRA_TEXT, data);
+                intent.putExtra(INT_EXTRA, position);
+                intent.putExtra(SER_EXTRA, mTracksData);
                 startActivity(intent);
             }
         });
 
         listView.setAdapter(mSongsAdapter);
 
-        new FetchTracksTask().execute(artistData.get(0));
+        new FetchTracksTask().execute(mArtistData.get(0));
 
         return rootView;
     }
@@ -98,13 +91,15 @@ public class SongsActivityFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Tracks tracks) {
-            mTrackList = tracks.tracks;
-            if(mTrackList != null && !mTrackList.isEmpty()){
+            List<Track> trackList = tracks.tracks;
+            if(trackList != null && !trackList.isEmpty()){
                 mSongsAdapter.clear();
-                mSongsAdapter.add(mTrackList);
+                mSongsAdapter.add(trackList);
             }else{
                 Toast.makeText(getActivity(), R.string.tracks_not_found,
                         Toast.LENGTH_SHORT).show();
+            }if(trackList != null){
+                mTracksData = new TracksData(trackList, mArtistData.get(1));
             }
         }
     }
