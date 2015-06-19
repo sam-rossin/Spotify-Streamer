@@ -28,6 +28,7 @@ import kaaes.spotify.webapi.android.models.Track;
  * A placeholder fragment containing a simple view.
  */
 public class PlaybackActivityFragment extends Fragment {
+    public static final String INT_KEY = "com.rossin.sam.int.key";
     private TracksData mTracksData;
     private MediaPlayer mMediaPlayer;
     private boolean mPlaying = true;
@@ -36,6 +37,7 @@ public class PlaybackActivityFragment extends Fragment {
     private Runnable updateSeekBar;
     private int mPosition;
     private int mDuration;
+    private int mCurLocation;
 
     private TextView artistView;
     private TextView albumView;
@@ -43,6 +45,7 @@ public class PlaybackActivityFragment extends Fragment {
     private ImageView imageView;
     private TextView pastView;
     private TextView remainingView;
+    private ImageButton playButton;
 
     public PlaybackActivityFragment() {
     }
@@ -83,16 +86,18 @@ public class PlaybackActivityFragment extends Fragment {
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                if(seekBar == mSeekBar && fromUser){
-                    if (mMediaPlayer != null){
+                if (seekBar == mSeekBar && fromUser) {
+                    if (mMediaPlayer != null) {
                         mMediaPlayer.seekTo(progress);
-                        setProgressText(progress);
+                        setProgress(progress);
                     }
                 }
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
             }
+
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
             }
@@ -115,12 +120,12 @@ public class PlaybackActivityFragment extends Fragment {
             }
         });
 
-        final ImageButton playButton = (ImageButton) rootView.findViewById(R.id.button_play);
+        playButton = (ImageButton) rootView.findViewById(R.id.button_play);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mPlaying) pause(playButton);
-                else play(playButton);
+                else play();
             }
         });
 
@@ -134,11 +139,20 @@ public class PlaybackActivityFragment extends Fragment {
             }
         };
 
-        startTrack();
+
+        //set location based on saved insance
+        if (savedInstanceState != null){
+            mCurLocation = savedInstanceState.getInt(INT_KEY);
+        }else mCurLocation = 0;
 
         return rootView;
     }
 
+    @Override
+    public void onStart() {
+        startTrack();
+        super.onStart();
+    }
 
     //Starts the player
     private void startTrack(){
@@ -157,7 +171,7 @@ public class PlaybackActivityFragment extends Fragment {
     private void pause(ImageButton playButton){
         mPlaying = false;
         playButton.setImageResource(android.R.drawable.ic_media_play);
-        if(mMediaPlayer.isPlaying()){
+        if(mMediaPlayer!=null && mMediaPlayer.isPlaying()){
             mMediaPlayer.pause();
         }
     }
@@ -165,6 +179,7 @@ public class PlaybackActivityFragment extends Fragment {
     //set song progress
     private void setProgress(int progress){
         mSeekBar.setProgress(progress);
+        mCurLocation = progress;
         setProgressText(progress);
     }
 
@@ -175,7 +190,7 @@ public class PlaybackActivityFragment extends Fragment {
     }
 
     //play the song
-    private void play(ImageButton playButton){
+    private void play(){
         mPlaying = true;
         playButton.setImageResource(android.R.drawable.ic_media_pause);
         mMediaPlayer.start();
@@ -216,10 +231,10 @@ public class PlaybackActivityFragment extends Fragment {
             public void onPrepared(MediaPlayer mp) {
                 if (mp == mMediaPlayer) {
                     mDuration = mp.getDuration();
+                    mp.seekTo(mCurLocation);
                     mSeekBar.setMax(mDuration);
                     setProgress(0);
-                    mp.start();
-                    mSeekBarHandler.postDelayed(updateSeekBar, 100);
+                    play();
                 }
             }
         });
@@ -231,6 +246,12 @@ public class PlaybackActivityFragment extends Fragment {
                     Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putInt(INT_KEY, mCurLocation);
+        super.onSaveInstanceState(outState);
     }
 
 
