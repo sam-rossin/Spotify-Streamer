@@ -41,6 +41,8 @@ public class PlaybackActivityFragment extends Fragment {
     private TextView albumView;
     private TextView songView;
     private ImageView imageView;
+    private TextView pastView;
+    private TextView remainingView;
 
     public PlaybackActivityFragment() {
     }
@@ -74,6 +76,27 @@ public class PlaybackActivityFragment extends Fragment {
         songView = (TextView) rootView.findViewById(R.id.text_view_playback_song);
         imageView = (ImageView) rootView.findViewById(R.id.playback_image);
         mSeekBar = (SeekBar) rootView.findViewById(R.id.seekBar);
+        pastView = (TextView) rootView.findViewById(R.id.text_view_time_past);
+        remainingView = (TextView) rootView.findViewById(R.id.text_view_time_remaining);
+
+        //set up seekBar on change listener
+        mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(seekBar == mSeekBar && fromUser){
+                    if (mMediaPlayer != null){
+                        mMediaPlayer.seekTo(progress);
+                        setProgressText(progress);
+                    }
+                }
+            }
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+            }
+        });
 
         //set up onClickListeners
         ImageButton previousButton = (ImageButton) rootView.findViewById(R.id.button_previous);
@@ -142,6 +165,13 @@ public class PlaybackActivityFragment extends Fragment {
     //set song progress
     private void setProgress(int progress){
         mSeekBar.setProgress(progress);
+        setProgressText(progress);
+    }
+
+    private void setProgressText(int progress){
+        pastView.setText(String.format("%d:%02d", (progress / 1000) / 60, (progress / 1000) % 60));
+        remainingView.setText(String.format("%d:%02d", ((mDuration-progress)/1000)/60,
+                ((mDuration-progress)/1000)%60));
     }
 
     //play the song
@@ -187,6 +217,7 @@ public class PlaybackActivityFragment extends Fragment {
                 if (mp == mMediaPlayer) {
                     mDuration = mp.getDuration();
                     mSeekBar.setMax(mDuration);
+                    setProgress(0);
                     mp.start();
                     mSeekBarHandler.postDelayed(updateSeekBar, 100);
                 }
